@@ -19,3 +19,31 @@ RUN apt-get update && apt-get -y install \
     sudo \
  && rm -rf code.deb \
  && rm -rf /var/lib/apt/lists/*
+
+WORKDIR /usr/share/fonts/truetype/droid-sans-mono
+ADD utils/droid-sans-mono.ttf .
+RUN chmod 644 droid-sans-mono.ttf
+
+WORKDIR /usr/share/themes/Flatabulous/gtk-2.0
+ADD utils/gtkrc .
+RUN chmod 644 gtkrc
+
+ADD utils/gtkrc-2.0 /etc/skel/.gtkrc-2.0
+
+ENV USERNAME=code GID=1000 UID=1000 \
+    CODECONF=/code/config CODEEXT=/code/extensions
+
+ENV VSCODE code --user-data-dir ${CODECONF} --extensions-dir ${CODEEXT}
+RUN echo "export PATH=$PATH:~/.local/bin" >> /etc/profile \
+ && echo "alias vscode='${VSCODE}'" >> /etc/skel/.bashrc
+
+RUN useradd -ms /bin/bash ${USERNAME} \
+ && mkdir -p ${CODECONF} ${CODEEXT} \
+ && chown -R ${USERNAME}:${USERNAME} /code
+
+WORKDIR /
+
+ADD start.sh /usr/local/bin/start.sh
+RUN chmod +x /usr/local/bin/start.sh
+
+ENTRYPOINT ["start.sh"]
