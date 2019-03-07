@@ -4,19 +4,27 @@ FROM ubuntu:latest
 ENV CODEDEB=https://go.microsoft.com/fwlink/?LinkID=760868
 ADD $CODEDEB code.deb
 
-RUN apt-get update && apt-get -y install \
+RUN apt-get update \
+&& apt-get upgrade \
+&& apt-get -y install \
     --no-install-recommends \
     ./code.deb \
+    apt-utils \
     libgtk2.0-0 \
     libx11-xcb1 \
     libxtst6 \
     libxss1 \
     libasound2 \
+    dbus \
+    libgl1 \
     git \
     openssh-server \
     xauth \
     ttf-ubuntu-font-family \
     sudo \
+ && mkdir /.vscode \
+ && mkdir /.vscode/User \
+ && echo "{ { \"window.titleBarStyle\": \"native\" } }" > /.vscode/User/settings.json \
  && rm -rf code.deb \
  && rm -rf /var/lib/apt/lists/*
 
