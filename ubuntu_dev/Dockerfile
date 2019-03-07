@@ -5,7 +5,7 @@ ENV CODEDEB=https://go.microsoft.com/fwlink/?LinkID=760868
 ADD $CODEDEB code.deb
 
 RUN apt-get update \
-&& apt-get upgrade \
+&& apt-get -y upgrade \
 && apt-get -y install \
     --no-install-recommends \
     ./code.deb \
