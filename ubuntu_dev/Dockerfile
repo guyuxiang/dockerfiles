@@ -1,12 +1,11 @@
 FROM ubuntu:latest
 
-# vs code
 ENV CODEDEB=https://go.microsoft.com/fwlink/?LinkID=760868
 ADD $CODEDEB code.deb
 
 RUN apt-get update \
-&& apt-get -y upgrade \
-&& apt-get -y install \
+    && apt-get -y upgrade \
+    && apt-get -y install \
     --no-install-recommends \
     ./code.deb \
     apt-utils \
@@ -22,36 +21,31 @@ RUN apt-get update \
     xauth \
     ttf-ubuntu-font-family \
     sudo \
- && mkdir /.vscode \
- && mkdir /.vscode/User \
- && echo "{ { \"window.titleBarStyle\": \"native\" } }" > /.vscode/User/settings.json \
- && rm -rf code.deb \
- && rm -rf /var/lib/apt/lists/*
+    && rm -rf code.deb \
+    && rm -rf /var/lib/apt/lists/*
+ 
+ENV USERNAME=devg GID=1001 UID=1001
+ENV VSETC=/etc/.vscode
+ENV VS_CODE_USER=${VSETC}/${USERNAME}
 
-# WORKDIR /usr/share/fonts/truetype/droid-sans-mono
-# ADD utils/droid-sans-mono.ttf .
-# RUN chmod 644 droid-sans-mono.ttf
+RUN groupadd -g ${GID} ${USERNAME} && \
+    useradd -l -r -u ${UID} -g ${USERNAME} ${USERNAME} \
+    && mkdir -p ${VS_CODE_USER}/User \
+    && mkdir -p ${VS_CODE_USER}/extensions \
+    && echo "{\"window.titleBarStyle\": \"native\"}" > ${VS_CODE_USER}/User/settings.json \
+    && /bin/bash -c 'service dbus start' \
+    && /bin/bash -c 'code --user-data-dir=${VS_CODE_USER} --extensions-dir ${VS_CODE_USER}/extensions --install-extension streetsidesoftware.code-spell-checker' \
+    && /bin/bash -c 'code --user-data-dir=${VS_CODE_USER} --extensions-dir ${VS_CODE_USER}/extensions --install-extension github.vscode-pull-request-github' \
+    && /bin/bash -c 'code --user-data-dir=${VS_CODE_USER} --extensions-dir ${VS_CODE_USER}/extensions --install-extension ms-python.python' \
+    && /bin/bash -c 'code --user-data-dir=${VS_CODE_USER} --extensions-dir ${VS_CODE_USER}/extensions --install-extension juanblanco.solidity' \
+    && /bin/bash -c 'code --user-data-dir=${VS_CODE_USER} --extensions-dir ${VS_CODE_USER}/extensions --install-extension hookyqr.beautify' \
+    && /bin/bash -c 'code --user-data-dir=${VS_CODE_USER} --extensions-dir ${VS_CODE_USER}/extensions --install-extension davidanson.vscode-markdownlint' \
+    && /bin/bash -c 'code --user-data-dir=${VS_CODE_USER} --extensions-dir ${VS_CODE_USER}/extensions --install-extension yzhang.markdown-all-in-one' \
+    && /bin/bash -c 'code --user-data-dir=${VS_CODE_USER} --extensions-dir ${VS_CODE_USER}/extensions --install-extension dbaeumer.vscode-eslint' \
+    && /bin/bash -c 'code --user-data-dir=${VS_CODE_USER} --extensions-dir ${VS_CODE_USER}/extensions --install-extension eamodio.gitlens' \
+    && /bin/bash -c 'code --user-data-dir=${VS_CODE_USER} --extensions-dir ${VS_CODE_USER}/extensions --install-extension pkief.material-icon-theme' \
+    && /bin/bash -c 'code --user-data-dir=${VS_CODE_USER} --extensions-dir ${VS_CODE_USER}/extensions --install-extension msjsdiag.debugger-for-chrome' \
+    && chown -R ${USERNAME}:${USERNAME} ${VS_CODE_USER}
 
-# WORKDIR /usr/share/themes/Flatabulous/gtk-2.0
-# ADD utils/gtkrc .
-# RUN chmod 644 gtkrc
-
-# ADD utils/gtkrc-2.0 /etc/skel/.gtkrc-2.0
-
-ENV USERNAME=code GID=1000 UID=1000 \
-    CODECONF=/code/config CODEEXT=/code/extensions
-
-ENV VSCODE code --user-data-dir ${CODECONF} --extensions-dir ${CODEEXT}
-RUN echo "export PATH=$PATH:~/.local/bin" >> /etc/profile \
- && echo "alias vscode='${VSCODE}'" >> /etc/skel/.bashrc
-
-RUN useradd -ms /bin/bash ${USERNAME} \
- && mkdir -p ${CODECONF} ${CODEEXT} \
- && chown -R ${USERNAME}:${USERNAME} /code
-
-WORKDIR /
-
-# ADD start.sh /usr/local/bin/start.sh
-# RUN chmod +x /usr/local/bin/start.sh
-
-# ENTRYPOINT ["start.sh"]
+USER ${USERNAME}
+WORKDIR /home/${USERNAME}
