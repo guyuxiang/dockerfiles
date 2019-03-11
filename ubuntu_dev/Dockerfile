@@ -32,7 +32,10 @@ RUN groupadd -g ${GID} ${USERNAME} && \
     useradd -l -r -u ${UID} -g ${USERNAME} ${USERNAME} \
     && mkdir -p ${VS_CODE_USER}/User \
     && mkdir -p ${VS_CODE_USER}/extensions \
-    && echo "{\"window.titleBarStyle\": \"native\"}" > ${VS_CODE_USER}/User/settings.json \
+    && echo "{ \
+            \"window.titleBarStyle\": \"native\", \
+            \"terminal.integrated.shell.linux\": \"/bin/bash\" \
+            }" > ${VS_CODE_USER}/User/settings.json \
     && /bin/bash -c 'service dbus start' \
     && /bin/bash -c 'code --user-data-dir=${VS_CODE_USER} --extensions-dir ${VS_CODE_USER}/extensions --install-extension streetsidesoftware.code-spell-checker' \
     && /bin/bash -c 'code --user-data-dir=${VS_CODE_USER} --extensions-dir ${VS_CODE_USER}/extensions --install-extension github.vscode-pull-request-github' \
