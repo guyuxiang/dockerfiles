@@ -1,0 +1,1 @@
+docker run --rm -it --shm-size=2gb --name code-server -p 127.0.0.1:8443:8443 -v c:/Users/yuxia/docker-volumes/code-server:/root:cached yuxianggu/code-server:latest
